@@ -1884,7 +1884,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
 
     if (m_spellInfo->IsSpellAppliesAura(effectMask))
     {
-        m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, pRealUnitCaster ? pRealUnitCaster : unit, m_caster, m_CastItem);
+        m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, pRealUnitCaster ? pRealUnitCaster : unit, m_caster, GetValidatedCastItem());
         m_spellAuraHolder->SetAddedBySpell(true);
         m_spellAuraHolder->SetTriggered(IsTriggered());
         m_spellAuraHolder->SetReflected(isReflected);
@@ -4057,6 +4057,7 @@ void Spell::handle_immediate()
 
 uint64 Spell::handle_delayed(uint64 t_offset)
 {
+    GetValidatedCastItem();
     uint64 next_time = 0;
 
     if (!m_immediateHandled)
@@ -8400,6 +8401,23 @@ void Spell::ClearCastItem()
         m_targets.setItemTarget(nullptr);
 
     m_CastItem = nullptr;
+    m_castItemGuid.Clear();
+}
+
+Item* Spell::GetValidatedCastItem()
+{
+    if (!m_CastItem)
+        return nullptr;
+
+    if (m_caster && m_caster->IsPlayer() && m_castItemGuid)
+    {
+        if (!((Player*)m_caster)->GetItemByGuid(m_castItemGuid))
+        {
+            m_CastItem = nullptr;
+            return nullptr;
+        }
+    }
+    return m_CastItem;
 }
 
 bool Spell::HasGlobalCooldown() const

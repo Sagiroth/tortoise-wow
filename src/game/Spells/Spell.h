@@ -421,6 +421,7 @@ class Spell
         SpellEntry const* m_triggeredByParentSpellInfo; // Spell that triggered the spell that triggered this
         int32 m_currentBasePoints[MAX_EFFECT_INDEX]; // cache SpellEntry::CalculateSimpleValue and use for set custom base points
         Item* m_CastItem = nullptr;
+        ObjectGuid m_castItemGuid;
         SpellCastTargets m_targets;
 
         bool IsCustomSpell() const { return m_isCustomSpell; }
@@ -492,7 +493,10 @@ class Spell
         void SetCastItem(Item* item)
         {
             m_CastItem = item;
+            m_castItemGuid = item ? item->GetObjectGuid() : ObjectGuid();
         }
+        Item* GetValidatedCastItem();
+        ObjectGuid GetCastItemGuid() const { return m_castItemGuid; }
         void RemoveStealthAuras();
 
         void Delete() const;
