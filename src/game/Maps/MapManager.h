@@ -117,7 +117,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void SetMapUpdateInterval(uint32 t)
         {
-            if( t > MIN_MAP_UPDATE_DELAY )
+            if( t < MIN_MAP_UPDATE_DELAY )
                 t = MIN_MAP_UPDATE_DELAY;
 
             i_timer.SetInterval(t);
