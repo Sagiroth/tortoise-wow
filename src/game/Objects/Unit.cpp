@@ -944,19 +944,21 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             else
                 pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
         }
-        else                                                // victim is a player
+        // Only a player victim takes this branch. A non-player victim hit without
+        // threat (e.g. the Ignite DoT) must skip it rather than be cast to Player.
+        else if (Player* pPlayerVictim = pVictim->ToPlayer())
         {
             // Rage from damage received
             if (this != pVictim && pVictim->GetPowerType() == POWER_RAGE)
             {
-                ((Player*)pVictim)->RewardRage(damage, false);
+                pPlayerVictim->RewardRage(damage, false);
             }
 
             // random durability for items (HIT TAKEN)
             if (roll_chance_f(sWorld.getConfig(CONFIG_FLOAT_RATE_DURABILITY_LOSS_DAMAGE)))
             {
                 EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
-                ((Player*)pVictim)->DurabilityPointLossForEquipSlot(slot);
+                pPlayerVictim->DurabilityPointLossForEquipSlot(slot);
             }
         }
 
